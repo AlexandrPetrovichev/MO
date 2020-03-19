@@ -151,6 +151,7 @@
     <ClCompile Include="func.cpp" />
     <ClCompile Include="golden.cpp" />
     <ClCompile Include="MO_laba2.cpp" />
+    <ClCompile Include="Pirson.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sol.h" />

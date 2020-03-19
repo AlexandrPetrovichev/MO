@@ -6,7 +6,7 @@
 //Одномерная оптимизация - применим метод золотого сечения
 double FindMin(double* s, double* p)
 {
-    const double eps = 1e-8;
+    const double eps = 1e-7;
     const double r = 1.618;
     double a = 0;
     double b = 10;

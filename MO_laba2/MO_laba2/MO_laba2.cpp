@@ -19,7 +19,16 @@ double inner_prod(double* x, double* y) { return x[1] * y[1] + x[0] * y[0] - 5; 
 int main()
 {
     cout.precision(9);
-    FletcherRievesMethod();
+    int n = 2;
+    vector<double> x0 = { 1,-0.5 };
+    vector<double> xk = { 2,-0.5 };
+    vector<double> f = dF(xk);
+    double eps = 1e-3;
+    Matrix h0 = {
+        {1,0},
+        {0,1}
+    };
+    Pirson(h0,x0,eps);
     return 0;
 }
 

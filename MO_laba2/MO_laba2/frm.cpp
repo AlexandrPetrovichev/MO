@@ -9,7 +9,7 @@ double FletcherRievesMethod()
     double eps = 1e-3;
     const double EPS = 1e-5;
     //Начальное приближение
-    double x[2] = { 1, 2 };
+    double x[2] = { 2, 2 };
     double curVal = F1(x);
     double prevVal = curVal;
     double p[2];
