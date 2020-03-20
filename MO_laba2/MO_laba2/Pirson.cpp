@@ -186,7 +186,7 @@ vector<double> Pirson(Matrix h0,
 {
 	int n = x0.size();
 	vector<double> df,xpr,xk = x0,p,dg(n);
-	double Lk;
+	double Lk,t;
 	Matrix h = h0;
 	int iter = 0;
 	vector<double> dx(n);
@@ -205,7 +205,13 @@ vector<double> Pirson(Matrix h0,
 		
 		dg = dG(xpr, xk);
 		h = Findh(h, dx, dg);
+		t = h[0][0] * h[1][1] - h[0][1] * h[1][0];
+		if (t<=0)
+		{
+			h = h0;
+		}
 		df = dF(xk);
+		
 	} while (Norm(df)>eps);
 	
 	PrintSolution(xk.data(), F1(xk.data()), iter);

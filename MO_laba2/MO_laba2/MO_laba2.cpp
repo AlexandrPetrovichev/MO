@@ -20,7 +20,7 @@ int main()
 {
     cout.precision(9);
     int n = 2;
-    vector<double> x0 = { 1,-0.5 };
+    vector<double> x0 = { 0.5,0.5 };
     vector<double> xk = { 2,-0.5 };
     vector<double> f = dF(xk);
     double eps = 1e-3;
