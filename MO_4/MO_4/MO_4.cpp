@@ -2,9 +2,12 @@
 #include <math.h>
 #include <random>
 #include <omp.h>
+#include <fstream>
 using namespace std;
-const double eps = 1e-7;
-int N = 695;
+double eps = 1e-7;
+int N = 1;
+double fc1 = 0, fc2 = 0, fc3 = 0;
+double m = 100;
 double r = 1;
 double A[2] = { -10, -10 };
 double B[2] = { 10, 10 };
@@ -54,6 +57,9 @@ double ff(pair<double, double> z)
 	{
 		f += C[i] / (1 + (x - a[i]) * (x - a[i]) + (y - b[i]) * (y - b[i]));
 	}
+	fc1++;
+	fc2++;
+	fc3++;
 	return -f;
 }
 
@@ -62,8 +68,6 @@ pair<double, double> Easy_random_search()
 	pair<double, double> x, x1;
 	int k = 0;
 	x = Rand();
-	omp_set_num_threads(4);
-#pragma omp parallel for
 	for (int i = 0; i < N; i++)
 	{
 		x1 = Rand();
@@ -152,10 +156,20 @@ pair<double, double> Roz(pair<double, double> x)
 	} while (abs(f(x_old) - f(x)) > eps);
 	return x;
 }
+pair<double, double> Random_vec()
+{
+	pair<double, double> x;
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_real_distribution<> dis(-0.1, 0.1);
+	x.first = dis(gen);
+	x.second = sqrt(1 - x.first * x.first);
+	return x;
+}
 pair<double, double> Global_search_1()
 {
 	pair<double, double> x, x1;
-	int m = 1000, flag = 0, q = 0;
+	int flag = 0, q = 0;
 	x = { 5, 5 };
 	while (flag < m)
 	{
@@ -171,7 +185,7 @@ pair<double, double> Global_search_1()
 			flag++;
 			q = 0;
 		}
-			if (q == 1)
+		if (q == 1)
 			flag = 0;
 	}
 	//cout << -x.first << '\t' << -x.second << '\t' << -ff(x) << endl;
@@ -181,7 +195,7 @@ pair<double, double> Global_search_1()
 pair<double, double> Global_search_2()
 {
 	pair<double, double> x, x1;
-	int m = 1000, flag = 0, q = 0, i = 0;;
+	int flag = 0, q = 0, i = 0;;
 	x = Rand();
 	x = Roz(x);
 	do {
@@ -203,16 +217,7 @@ pair<double, double> Global_search_2()
 	return x;
 }
 
-pair<double, double> Random_vec()
-{
-	pair<double, double> x;
-	random_device rd;
-	mt19937 gen(rd());
-	uniform_real_distribution<> dis(-1, 1);
-	x.first = dis(gen);
-	x.second = sqrt(1 - x.first * x.first);
-	return x;
-}
+
 
 pair<double, double>Best_prob(pair<double, double> x)
 {
@@ -229,49 +234,90 @@ double Sign(double x)
 }
 pair<double, double> Global_search_3()
 {
-	pair<double, double> x = { 0,0}, x1, x11, x2, e;
-	int flag = 0, m = 1000;
-	double a = 1e-7;
-	
-	x1 = Roz(x);
-	do
-	{
-		x11 = x1;
-		e = Random_vec();
-		do {
-			
-			x11.first += a*e.first;
-			x11.second += a*e.second;
-		} while (ff(x11) < ff(x1));
-		x2 = x11;
-		if (ff(x2) < ff(x1))
+	pair<double, double> x1 = {0,0 }, x2,e;
+	int i = 0, f = m;
+	do {
+	x1 = Roz(x1);
+	x2 = x1;
+		do
 		{
-			x1 = x2;
-			flag = 0;
+			e = Random_vec();
+			x2.first += e.first;
+			x2.second += e.second;
+			i++;
+		} while (ff(x2) <= ff(x1) && fabs(x2.first) < 10 && fabs(x2.second) < 10);
+		if (fabs(x2.first) > 10 && fabs(x2.second) > 10)
+		{
+			x2.first -= e.first;
+			x2.second -= e.second;
 		}
+		x2 = Roz(x2);
+		if (ff(x2) < ff(x1))
+			x1 = x2;
 		else
-			flag++;
-	} while (flag < m);
-	return x;
+			f--;
+	} while (f > 0);
+	return x2;
 }
 int main()
 {
 	pair<double, double> x;
-	double P = 0.999;
-	double V = (B[0] - A[0]) * (B[1] - A[1]);
-	double Veps = eps * eps;
-	double Peps = Veps / V;
-	double a = log(1 - P) / log(1 - Peps);
-	//while (N < log(1 - P) / log(1 - Peps))
-	//	N += 100;
-	//x = Easy_random_search();
-	//cout << -x.first << '\t' << -x.second << '\t' << -ff(x) << endl;
+	ofstream fout;
+	fout.open("out.txt");
+//	eps = 1;
+//	for(int j = 0; j < 3; j++)
+//	{
+//		eps = 1 / pow(10, j);
+//		double P = 0.9;
+//		double V = (B[0] - A[0]) * (B[1] - A[1]);
+//		double Veps = eps * eps;
+//		double Peps = Veps / V;
+//		double a = log(1 - P) / log(1 - Peps);
+//		while (N < log(1 - P) / log(1 - Peps))
+//			N += 100;
+//		x = Easy_random_search();
+//		fout << eps << '\t' << P << '\t' << N << '\t' << -x.first << '\t' << -x.second << '\t' << -ff(x) << endl;
+//	}
+	eps = 1e-2;
+	for (int i = 0; i < 3; i++)
+	{
+		double P = 0.1 + 0.4 * i;
+		double V = (B[0] - A[0]) * (B[1] - A[1]);
+		double Veps = eps * eps;
+		double Peps = Veps / V;
+		double a = log(1 - P) / log(1 - Peps);
+		while (N < log(1 - P) / log(1 - Peps))
+			N += 100;
+		x = Easy_random_search();;
+		fout << eps << '\t' << P << '\t' << N << '\t' << -x.first << '\t' << -x.second << '\t' << -ff(x) << endl;
+
+	}
+	//m = 1;
+	//for (int i = 0; i < 3; i++)
+	//{
+	//	m *= 10;
+	//	fc1 = 0;
+	//	fc2 = 0;
+	//	fc3 = 0;
+	//	fout.precision(8);
+	//	x = Global_search_1();
+	//	fout << "1" << '\t';
+	//	fout << m << '\t' << fc1 << '\t' << -x.first << '\t' << -x.second << '\t' << -ff(x) << endl;
+	//	x = Global_search_2();
+	//	fout << "2" << '\t';
+	//	fout << m << '\t' << fc2 << '\t' << -x.first << '\t' << -x.second << '\t' << -ff(x) << endl;
+	//	x = Global_search_3();
+	//	fout << "3" << '\t';
+	//	fout << m << '\t' << fc3 << '\t' << -x.first << '\t' << -x.second << '\t' << -ff(x) << endl;
+	//
+	//}
+	//m = 100;
+	//
 	//x = Global_search_1();
-	//cout << -x.first << '\t' << -x.second << '\t' << -ff(x) << endl;
-	//x = Global_search_2();
-	//cout << -x.first << '\t' << -x.second << '\t' << -ff(x) << endl;
-	x = Global_search_3();
-	cout << -x.first << '\t' << -x.second << '\t' << -ff(x) << endl;
+	//	fout << "1" << '\t';
+	//	cout << m << '\t' << -x.first << '\t' << -x.second << '\t' << -ff(x) << endl;
+	fout.close();
+
 	return 0;
 }
 
